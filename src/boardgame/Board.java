@@ -41,4 +41,15 @@ public class Board {
 		return pieces[position.getRow()][position.getColumn()];
 	}
 
+
+	// Pegando a matriz na posicao dada e abribuindo a ela a peca informada
+	public void placePiece(Piece piece, Position position) {
+		pieces[position.getRow()][position.getColumn()] = piece;
+	
+	// Infomando que peca nao está na posicao null
+		piece.position = position;
+	
+	}
+	
+	
 }
