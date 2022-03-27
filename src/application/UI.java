@@ -1,7 +1,10 @@
 package application;
 
+import java.util.Arrays;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import chess.ChessMatch;
 import chess.ChessPiece;
@@ -50,14 +53,15 @@ public class UI {
 	}
 
 	// imprimindo os jogadores e os turnos
-	public static void printMatch(ChessMatch chessMatch) {
+	public static void printMatch(ChessMatch chessMatch, List<ChessPiece> captured) {
 		printBoard(chessMatch.getPieces());
+		System.out.println();
+		printCapturedPiecies(captured);
 		System.out.println();
 		System.out.println("Turn : " + chessMatch.getTurn());
 		System.out.println("Waiting player " + chessMatch.getCurrentPlayer());
 	}
-	
-	
+
 	// imprimindo a tabuleiro na tela
 	public static void printBoard(ChessPiece[][] pieces) {
 
@@ -74,7 +78,7 @@ public class UI {
 		System.out.println("  a b c d e f g h");
 	}
 
-	// imprimindo a indicacao de movimentos da peca 
+	// imprimindo a indicacao de movimentos da peca
 	public static void printBoard(ChessPiece[][] pieces, boolean[][] possibleMoves) {
 
 		for (int i = 0; i < pieces.length; i++) {
@@ -89,15 +93,14 @@ public class UI {
 		}
 		System.out.println("  a b c d e f g h");
 	}
-	
-	
+
 	// Testando se a peca esta na posicao e imprimindo uma peca
 	private static void printPiece(ChessPiece piece, boolean background) {
-		if(background) {
-			
+		if (background) {
+
 			System.out.print(ANSI_BLUE_BACKGROUND);
 		}
-		
+
 		if (piece == null) {
 			System.out.print("-" + ANSI_RESET);
 		} else {
@@ -108,6 +111,29 @@ public class UI {
 			}
 		}
 		System.out.print(" ");
+	}
+
+	private static void printCapturedPiecies(List<ChessPiece> captured) {
+		List<ChessPiece> white = captured.stream().filter(x -> x.getColor() == Color.WHITE)
+				.collect(Collectors.toList());
+		List<ChessPiece> black = captured.stream().filter(x -> x.getColor() == Color.BLACK)
+				.collect(Collectors.toList());
+		//list white
+		System.out.println("Captured Pieces:");
+		System.out.print("White: ");
+		System.out.print(ANSI_WHITE);
+		// Imprimindo padrao de valores da list
+		System.out.print(Arrays.toString(white.toArray()));
+		System.out.println(ANSI_RESET);
+		
+		//list black
+		System.out.print("Black: ");
+		System.out.print(ANSI_YELLOW);
+		// Imprimindo padrao de valores da list
+		System.out.print(Arrays.toString(black.toArray()));
+		System.out.println(ANSI_RESET);
+		
+		
 	}
 
 }
