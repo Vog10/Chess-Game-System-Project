@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 import boardgame.Board;
 import boardgame.Piece;
 import boardgame.Position;
@@ -17,6 +16,7 @@ public class ChessMatch {
 	private Color currentPlayer;
 	private Board board;
 	private boolean check;
+	private boolean checkMate;
 
 	private List<Piece> piecesOnTheBord = new ArrayList<>();
 	private List<Piece> capturedPieces = new ArrayList<>();
@@ -38,11 +38,15 @@ public class ChessMatch {
 		return currentPlayer;
 	}
 
-	public boolean getCheck(){
+	public boolean getCheck() {
 		return check;
-		
+
 	}
-	
+
+	public boolean getCheckMate() {
+		return checkMate;
+	}
+
 	// Metodo para percorre e acessa boardgame > Piece atraves do Chessmatch
 	public ChessPiece[][] getPieces() {
 		ChessPiece[][] mat = new ChessPiece[board.getRows()][board.getColumns()];
@@ -71,16 +75,22 @@ public class ChessMatch {
 		validateTargetPosition(source, target);
 
 		Piece capturedPiece = makeMove(source, target);
-		
-		//testando se o jogador esta se posicionado em check
-		if(testCheck(currentPlayer)) {
+
+		// testando se o jogador esta se posicionado em check
+		if (testCheck(currentPlayer)) {
 			undoMove(source, target, capturedPiece);
 			throw new ChessException("You can't put yourself in check");
 		}
-		
+
 		check = (testCheck(opponent(currentPlayer))) ? true : false;
-		
+
+		if(testCheckMate(opponent(currentPlayer))) {
+			checkMate = true;
+		}
+		else {
 		nextTurn();
+		}
+		
 		return (ChessPiece) capturedPiece;
 
 	}
@@ -171,6 +181,39 @@ public class ChessMatch {
 		return false;
 	}
 
+	// testando sem a peca esta em CheckMate
+	private boolean testCheckMate(Color color) {
+		if(!testCheck(color)) {
+			return false;
+		}
+		
+		List<Piece> list = piecesOnTheBord.stream()
+				.filter(x -> ((ChessPiece) x).getColor() == color).collect(Collectors.toList());
+		
+		for( Piece p : list) {
+			boolean[][] mat = p.possibleMoves();
+				for(int i = 0; i < board.getRows(); i++) {
+					for(int j = 0; j < board.getColumns(); j++) {
+					
+					if(mat[i][j]) {
+						Position source = ((ChessPiece)p).getChessPosition().toPosition();
+						Position targe = new Position(i, j);
+						Piece capturedPiece = makeMove(source, targe);
+						boolean testCheck = testCheck(color);
+						undoMove(source, targe, capturedPiece);
+						if(!testCheck) {
+							return false;
+						}
+						
+					}
+				}
+			}
+			
+		}
+		
+		return true;
+	}
+
 	// Passando as pecas nas coordenadas do xadrez
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
 		board.placePiece(piece, new ChessPosition(column, row).toPosition());
@@ -181,18 +224,12 @@ public class ChessMatch {
 	private void initialSetup()
 
 	{
-		placeNewPiece('c', 1, new Rook(board, Color.WHITE));
-		placeNewPiece('c', 2, new Rook(board, Color.WHITE));
-		placeNewPiece('d', 2, new Rook(board, Color.WHITE));
-		placeNewPiece('e', 2, new Rook(board, Color.WHITE));
-		placeNewPiece('e', 1, new Rook(board, Color.WHITE));
-		placeNewPiece('d', 1, new king(board, Color.WHITE));
+		placeNewPiece('h', 7, new Rook(board, Color.WHITE));
+		placeNewPiece('d', 1, new Rook(board, Color.WHITE));
+		placeNewPiece('e', 1, new king(board, Color.WHITE));
 
-		placeNewPiece('c', 7, new Rook(board, Color.BLACK));
-		placeNewPiece('c', 8, new Rook(board, Color.BLACK));
-		placeNewPiece('d', 7, new Rook(board, Color.BLACK));
-		placeNewPiece('e', 7, new Rook(board, Color.BLACK));
-		placeNewPiece('e', 8, new Rook(board, Color.BLACK));
-		placeNewPiece('d', 8, new king(board, Color.BLACK));
+		placeNewPiece('b', 8, new Rook(board, Color.BLACK));
+		placeNewPiece('a', 8, new king(board, Color.BLACK));
+
 	}
 }
